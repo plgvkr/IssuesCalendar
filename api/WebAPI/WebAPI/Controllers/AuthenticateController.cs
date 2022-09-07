@@ -20,17 +20,17 @@ public class AuthenticateController : ControllerBase
 
     [HttpPost]
     [Route("register")]
-    public async Task<ActionResult> RegisterUser(User user)
+    public async Task<ActionResult> RegisterUser(UserDTO userDto)
     {
-        if (_context.Users.Any(u => u.Email == user.Email))
+        if (_context.Users.Any(u => u.Email == userDto.Email))
         {
             return Conflict();
         }
 
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
-        user.PasswordHash = passwordHash;
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
 
-        user.ScheduledTasks = new List<ScheduledTask>();
+        var user = new User
+            {Email = userDto.Email, PasswordHash = passwordHash, ScheduledTasks = new List<ScheduledTask>()};
 
         _context.Users.Add(user);
 
@@ -41,14 +41,14 @@ public class AuthenticateController : ControllerBase
 
     [HttpPost]
     [Route("login")]
-    public ActionResult LoginUser(User user)
+    public ActionResult LoginUser(UserDTO userDto)
     {
-        if (!_context.Users.Any(u => u.Email == user.Email))
+        if (!_context.Users.Any(u => u.Email == userDto.Email))
         {
             return Unauthorized();
         }
 
-        var dbUser = _context.Users.Where(u => u.Email == user.Email).First();
+        var dbUser = _context.Users.Where(u => u.Email == userDto.Email).First();
 
         var claims = new List<Claim>
         {

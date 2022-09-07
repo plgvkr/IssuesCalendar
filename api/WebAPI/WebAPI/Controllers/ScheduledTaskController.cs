@@ -40,7 +40,7 @@ public class ScheduledTaskController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public ActionResult AddTask(ScheduledTaskDTO taskDTO)
+    public async Task<ActionResult> AddTask(ScheduledTaskDTO taskDTO)
     {
         var principal = HttpContext.User as ClaimsPrincipal;
 
@@ -55,14 +55,9 @@ public class ScheduledTaskController : ControllerBase
 
         var task = new ScheduledTask {Name = taskDTO.Name, Description = taskDTO.Description, User = user};
 
-        if (user.ScheduledTasks is null)
-        {
-            user.ScheduledTasks = new List<ScheduledTask>();
-        }
-        
-        user.ScheduledTasks.Add(task);
+        _context.ScheduledTasks.Add(task);
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
