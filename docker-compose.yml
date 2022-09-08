@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build: ./api/frontend
+    command: npm run start
+    ports:
+     - "8080:8080"
+  api:
+    build: ./api/WebApi
+    ports:
+     - "2000:2000"
