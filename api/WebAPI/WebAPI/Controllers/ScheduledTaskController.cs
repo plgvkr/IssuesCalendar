@@ -62,6 +62,75 @@ public class ScheduledTaskController : ControllerBase
         return Ok();
     }
 
+    [Authorize]
+    [HttpPut]
+    public async Task<ActionResult> UpdateTask(ScheduledTaskDTO taskDTO)
+    {
+        var principal = HttpContext.User as ClaimsPrincipal;
+
+        if (principal is null)
+        {
+            return NotFound();
+        }
+
+        var userId = GetUserId(principal);
+
+        var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+
+        var task = _context.ScheduledTasks.FirstOrDefault(t => t.ScheduledTaskId == taskDTO.Id);
+
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        if (task.User != user)
+        {
+            return NotFound();
+        }
+
+        task.Name = taskDTO.Name;
+        task.Description = taskDTO.Description;
+
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpDelete]
+    public async Task<ActionResult> DeleteTask(ScheduledTaskDTO taskDTO)
+    { 
+        var principal = HttpContext.User as ClaimsPrincipal;
+
+        if (principal is null)
+        {
+            return NotFound();
+        }
+
+        var userId = GetUserId(principal);
+
+        var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+
+        var task = _context.ScheduledTasks.FirstOrDefault(t => t.ScheduledTaskId == taskDTO.Id);
+
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        if (task.User != user)
+        {
+            return NotFound();
+        }
+
+        _context.ScheduledTasks.Remove(task);
+
+        await _context.SaveChangesAsync();
+
+        return Ok();
+    }
+
     private int GetUserId(ClaimsPrincipal principal)
     {
         if (principal.HasClaim(x => x.Type == ClaimTypes.NameIdentifier))
@@ -81,7 +150,7 @@ public class ScheduledTaskController : ControllerBase
 
         foreach (var task in scheduledTasks)
         {
-            var taskDto = new ScheduledTaskDTO {Name = task.Name, Description = task.Description};
+            var taskDto = new ScheduledTaskDTO {Id = task.ScheduledTaskId, Name = task.Name, Description = task.Description};
             result.Add(taskDto);
         }
 
