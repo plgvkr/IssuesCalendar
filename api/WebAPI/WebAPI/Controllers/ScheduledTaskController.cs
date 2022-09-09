@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Data;
 using WebAPI.Models;
+using WebAPI.Utils;
 
 namespace WebAPI.Controllers;
 
@@ -20,7 +21,7 @@ public class ScheduledTaskController : ControllerBase
 
     [Authorize]
     [HttpGet]
-    public ActionResult<IEnumerable<ScheduledTask>> GetTasks()
+    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasks()
     {
         var principal = HttpContext.User as ClaimsPrincipal;
 
@@ -49,11 +50,27 @@ public class ScheduledTaskController : ControllerBase
             return NotFound();
         }
 
+        string? dayString;
+
+        try
+        {
+            dayString = GetDayString(taskDTO.ScheduledDay);
+        }
+        catch
+        {
+            return BadRequest();
+        }
+
         var userId = GetUserId(principal);
 
         var user = _context.Users.Where(u => u.UserId == userId).First();
 
-        var task = new ScheduledTask {Name = taskDTO.Name, Description = taskDTO.Description, User = user};
+        var task = new ScheduledTask {
+            Name = taskDTO.Name,
+            Description = taskDTO.Description,
+            User = user,
+            ScheduledDay = dayString
+        };
 
         _context.ScheduledTasks.Add(task);
 
@@ -71,6 +88,17 @@ public class ScheduledTaskController : ControllerBase
         if (principal is null)
         {
             return NotFound();
+        }
+
+        string? dayString;
+
+        try
+        {
+            dayString = GetDayString(taskDTO.ScheduledDay);
+        }
+        catch
+        {
+            return BadRequest();
         }
 
         var userId = GetUserId(principal);
@@ -91,6 +119,7 @@ public class ScheduledTaskController : ControllerBase
 
         task.Name = taskDTO.Name;
         task.Description = taskDTO.Description;
+        task.ScheduledDay = dayString;
 
         await _context.SaveChangesAsync();
 
@@ -131,6 +160,36 @@ public class ScheduledTaskController : ControllerBase
         return Ok();
     }
 
+    [Authorize]
+    [HttpGet]
+    [Route("day")]
+    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasksByDay(DayParameter dayParameter)
+    {
+        var principal = HttpContext.User as ClaimsPrincipal;
+
+        if (principal is null)
+        {
+            return NotFound();
+        }
+
+        string? dayString;
+
+        try
+        {
+            dayString = GetDayString(dayParameter.day);
+        }
+        catch
+        {
+            return BadRequest();
+        }
+
+        var userId = GetUserId(principal);
+
+        var tasks = _context.ScheduledTasks.Where(t => t.User.UserId == userId && t.ScheduledDay == dayString);
+
+        return Ok(ConvertToDto(tasks));
+    }
+
     private int GetUserId(ClaimsPrincipal principal)
     {
         if (principal.HasClaim(x => x.Type == ClaimTypes.NameIdentifier))
@@ -150,11 +209,37 @@ public class ScheduledTaskController : ControllerBase
 
         foreach (var task in scheduledTasks)
         {
-            var taskDto = new ScheduledTaskDTO {Id = task.ScheduledTaskId, Name = task.Name, Description = task.Description};
+            var taskDto = new ScheduledTaskDTO {
+                Id = task.ScheduledTaskId,
+                Name = task.Name,
+                Description = task.Description,
+                ScheduledDay = task.ScheduledDay
+            };
+
             result.Add(taskDto);
         }
 
         return result;
     }
     
+    private string? GetDayString(string? userString)
+    {
+        DateTime day;
+        string? dayString;
+
+        if (userString == null)
+        {
+            dayString = null;
+        }
+        else if (!DateTime.TryParse(userString, out day))
+        {
+            throw new Exception();
+        }
+        else
+        {
+            dayString = day.ToString("d");
+        }
+
+        return dayString;
+    }
 }
