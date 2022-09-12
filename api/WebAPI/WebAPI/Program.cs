@@ -28,7 +28,7 @@ builder.Services.AddDbContext<ApplicationContext>(
     options => options.UseInMemoryDatabase(databaseName: "Test"));
 
 builder.Services.AddCors();
-    
+
 var app = builder.Build();
 
 app.UseCors(builder =>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -226,18 +227,19 @@ public class ScheduledTaskController : ControllerBase
     {
         DateTime day;
         string? dayString;
+        var culture = new CultureInfo("ru-RU");
 
         if (userString == null)
         {
             dayString = null;
         }
-        else if (!DateTime.TryParse(userString, out day))
+        else if (!DateTime.TryParseExact(userString, "d", culture, DateTimeStyles.None, out day))
         {
             throw new Exception();
         }
         else
         {
-            dayString = day.ToString("d");
+            dayString = day.ToString("d", culture);
         }
 
         return dayString;
