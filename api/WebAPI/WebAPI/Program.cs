@@ -24,12 +24,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
     });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<ApplicationContext>(
     options => options.UseInMemoryDatabase(databaseName: "Test"));
 
 builder.Services.AddCors();
 
 var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors(builder =>
        builder.AllowAnyOrigin()
