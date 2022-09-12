@@ -1,9 +1,9 @@
 services:
-  frontend:
-    build: ./api/frontend
-    command: npm run start
-    ports:
-     - "8080:8080"
+  # frontv2:
+  #   build: ./frontv2
+  #   command: npm run serve
+  #   ports:
+  #    - "8080:8080"
   api:
     build: ./api/WebApi
     ports:
