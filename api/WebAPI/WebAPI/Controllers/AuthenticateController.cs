@@ -8,7 +8,7 @@ using WebAPI.Models;
 namespace WebAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class AuthenticateController : ControllerBase
 {
     private ApplicationContext _context;
