@@ -26,14 +26,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddDbContext<ApplicationContext>(
     options => options.UseInMemoryDatabase(databaseName: "Test"));
+
+builder.Services.AddCors();
     
 var app = builder.Build();
 
 app.UseCors(builder =>
-       builder.WithOrigins("http://127.0.0.1:2000")
+       builder.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());
+              .AllowAnyMethod());
 
 app.UseAuthentication();
 app.UseAuthorization();
