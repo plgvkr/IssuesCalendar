@@ -191,6 +191,47 @@ public class ScheduledTaskController : ControllerBase
         return Ok(ConvertToDto(tasks));
     }
 
+    [Authorize]
+    [HttpGet]
+    [Route("month")]
+    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasksByMonth(DayParameter dayParameter)
+    {
+        var principal = HttpContext.User as ClaimsPrincipal;
+
+        if (principal is null)
+        {
+            return NotFound();
+        }
+
+        DateTime date;
+        var culture = new CultureInfo("ru-RU");
+
+        if (!DateTime.TryParse(dayParameter.day, culture, DateTimeStyles.None, out date))
+        {
+            return BadRequest();
+        }
+        
+        var userId = GetUserId(principal);
+
+        var usersTasks = _context.ScheduledTasks.Where(t => t.User.UserId == userId);
+
+        var dtoUsersTasks = ConvertToDto(usersTasks);
+
+        var resultTasks = dtoUsersTasks.Where(t =>
+        {
+            if (t.ScheduledDay is null)
+            {
+                return false;
+            }
+        
+            var taskDate = DateTime.Parse(t.ScheduledDay, culture);
+        
+            return date.Year == taskDate.Year && date.Month == taskDate.Month;
+        });
+
+        return Ok(resultTasks);
+    }
+
     private int GetUserId(ClaimsPrincipal principal)
     {
         if (principal.HasClaim(x => x.Type == ClaimTypes.NameIdentifier))
