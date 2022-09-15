@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import AutorizePage from '../views/Autorize.vue'
+import IssuesList from '../views/IssuesList.vue'
 
 Vue.use(VueRouter)
 
@@ -12,6 +13,11 @@ const routes = [
   {
     path: '/login',
     component: AutorizePage
+  },
+  {
+    path: '/issues',
+    name: 'IssuesList',
+    component: IssuesList
   }
 ]
 

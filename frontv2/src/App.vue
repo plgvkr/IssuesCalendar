@@ -1,5 +1,6 @@
 <template>
   <v-app class="app">
+    <NavigationModule></NavigationModule>
     <v-main class="d-flex justify-center align-center">
       <div class="d-flex justify-center">
         <router-view />
@@ -9,10 +10,13 @@
 </template>
 
 <script>
+import NavigationModule from './components/NavigationModule.vue'
 
 export default {
   name: 'App',
-
+  components: {
+    NavigationModule
+  },
   data: () => ({
     //
   })
