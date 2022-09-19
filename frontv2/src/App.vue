@@ -6,16 +6,19 @@
         <router-view />
       </div>
     </v-main>
+    <IssueCreate></IssueCreate>
   </v-app>
 </template>
 
 <script>
 import NavigationModule from './components/NavigationModule.vue'
+import IssueCreate from './components/IssueCreate.vue'
 
 export default {
   name: 'App',
   components: {
-    NavigationModule
+    NavigationModule,
+    IssueCreate
   },
   data: () => ({
     //

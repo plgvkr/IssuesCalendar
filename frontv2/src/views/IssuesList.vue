@@ -15,6 +15,9 @@ export default {
   components: {
     List
   },
+  mounted () {
+    this.giveData()
+  },
   methods: {
     giveData () {
       console.log(window.sessionStorage)
@@ -24,7 +27,7 @@ export default {
       // eslint-disable-next-line
       axios.get('http://localhost:2000/api/ScheduledTask', config)
         .then(response => {
-          console.log(response)
+          this.$store.dispatch('issues/loadIssuesActions', response.data)
         })
     }
   },
