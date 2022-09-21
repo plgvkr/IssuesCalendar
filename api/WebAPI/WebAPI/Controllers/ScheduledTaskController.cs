@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Data;
 using WebAPI.Models;
-using WebAPI.Utils;
 
 namespace WebAPI.Controllers;
 
@@ -164,7 +163,7 @@ public class ScheduledTaskController : ControllerBase
     [Authorize]
     [HttpGet]
     [Route("day")]
-    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasksByDay(DayParameter dayParameter)
+    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasksByDay(string day)
     {
         var principal = HttpContext.User as ClaimsPrincipal;
 
@@ -177,7 +176,7 @@ public class ScheduledTaskController : ControllerBase
 
         try
         {
-            dayString = GetDayString(dayParameter.day);
+            dayString = GetDayString(day);
         }
         catch
         {
@@ -194,7 +193,7 @@ public class ScheduledTaskController : ControllerBase
     [Authorize]
     [HttpGet]
     [Route("month")]
-    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasksByMonth(DayParameter dayParameter)
+    public ActionResult<IEnumerable<ScheduledTaskDTO>> GetTasksByMonth(string month)
     {
         var principal = HttpContext.User as ClaimsPrincipal;
 
@@ -206,7 +205,7 @@ public class ScheduledTaskController : ControllerBase
         DateTime date;
         var culture = new CultureInfo("ru-RU");
 
-        if (!DateTime.TryParse(dayParameter.day, culture, DateTimeStyles.None, out date))
+        if (!DateTime.TryParse(month, culture, DateTimeStyles.None, out date))
         {
             return BadRequest();
         }
