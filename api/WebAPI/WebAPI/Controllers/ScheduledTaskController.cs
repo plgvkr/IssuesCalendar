@@ -27,7 +27,7 @@ public class ScheduledTaskController : ControllerBase
 
         if (principal is null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         var userId = GetUserId(principal);
@@ -47,7 +47,7 @@ public class ScheduledTaskController : ControllerBase
 
         if (principal is null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         string? dayString;
@@ -87,7 +87,7 @@ public class ScheduledTaskController : ControllerBase
 
         if (principal is null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         string? dayString;
@@ -109,12 +109,12 @@ public class ScheduledTaskController : ControllerBase
 
         if (task == null)
         {
-            return NotFound();
+            return BadRequest();
         }
 
         if (task.User != user)
         {
-            return NotFound();
+            return BadRequest();
         }
 
         task.Name = taskDTO.Name;
@@ -134,7 +134,7 @@ public class ScheduledTaskController : ControllerBase
 
         if (principal is null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         var userId = GetUserId(principal);
@@ -145,12 +145,12 @@ public class ScheduledTaskController : ControllerBase
 
         if (task == null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         if (task.User != user)
         {
-            return NotFound();
+            return Forbid();
         }
 
         _context.ScheduledTasks.Remove(task);
@@ -169,7 +169,7 @@ public class ScheduledTaskController : ControllerBase
 
         if (principal is null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         string? dayString;
@@ -199,7 +199,7 @@ public class ScheduledTaskController : ControllerBase
 
         if (principal is null)
         {
-            return NotFound();
+            return Forbid();
         }
 
         DateTime date;
