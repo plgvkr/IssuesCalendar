@@ -60,7 +60,7 @@ public class AuthenticateController : ControllerBase
             claims: claims,
             audience: AuthOptions.Audience,
             issuer: AuthOptions.Issuer,
-            expires: DateTime.Now.Add(TimeSpan.FromMinutes(30)),
+            expires: DateTime.Now.Add(TimeSpan.FromDays(1)),
             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(),
                 SecurityAlgorithms.HmacSha256));
 
