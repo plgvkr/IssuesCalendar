@@ -11,15 +11,14 @@ public class ApplicationContext : DbContext
     public ApplicationContext(DbContextOptions<ApplicationContext> options)
         : base(options)
     {
-        //Database.EnsureCreated();
+        Database.EnsureCreated();
     }
 
-    // protected override void OnModelCreating(ModelBuilder modelBuilder)
-    // {
-    //     var passwordHash = BCrypt.Net.BCrypt.HashPassword("default");
-    //     
-    //     modelBuilder.Entity<User>().HasData(
-    //         new User {UserId = 1, Email = "user@mail.com", PasswordHash = passwordHash});
-    // }
-    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("default");
+
+        modelBuilder.Entity<User>().HasData(
+            new User {UserId = 1, Email = "user@mail.com", PasswordHash = passwordHash});
+    }
 }

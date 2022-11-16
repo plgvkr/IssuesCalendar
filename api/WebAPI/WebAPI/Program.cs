@@ -27,8 +27,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// builder.Services.AddDbContext<ApplicationContext>(
+//     options => options.UseInMemoryDatabase(databaseName: "Test"));
+
 builder.Services.AddDbContext<ApplicationContext>(
-    options => options.UseInMemoryDatabase(databaseName: "Test"));
+    options =>
+        options.UseNpgsql(
+            "Host=db;Port=5432;Database=db;Username=user;Password=password"));
 
 builder.Services.AddCors();
 

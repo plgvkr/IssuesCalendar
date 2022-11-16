@@ -5,6 +5,22 @@ services:
   #   ports:
   #    - "8080:8080"
   api:
-    build: ./api/WebApi
+    build: ./api/WebAPI
+    container_name: api
+    environment:
+      ASPNETCORE_URLS: "http://+:2000"
     ports:
      - "2000:2000"
+  
+  db:
+    image: postgres:14.5
+    container_name: db
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "password"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - .:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"   
