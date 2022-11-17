@@ -2,21 +2,24 @@ using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.Data;
 using WebAPI.Models;
+using WebAPI.Services;
 
 namespace WebAPI.Controllers;
-
 
 [ApiController]
 [Route("api/[controller]")]
 public class ScheduledTaskController : ControllerBase
 {
-    private ApplicationContext _context;
+    private readonly ApplicationContext _context;
+    private readonly ITaskConverter _taskConverter;
 
-    public ScheduledTaskController(ApplicationContext context)
+    public ScheduledTaskController(ApplicationContext context, ITaskConverter taskConverter)
     {
         _context = context;
+        _taskConverter = taskConverter;
     }
 
     [Authorize]
@@ -30,11 +33,20 @@ public class ScheduledTaskController : ControllerBase
             return Forbid();
         }
 
-        var userId = GetUserId(principal);
+        var userId = 0;
+
+        try
+        {
+            userId = GetUserId(principal);
+        }
+        catch (Exception e)
+        {
+            return BadRequest();
+        }
 
         var tasks = _context.ScheduledTasks.Where(t => t.User.UserId == userId).AsEnumerable();
 
-        var taskDto = ConvertToDto(tasks);
+        var taskDto = _taskConverter.ConvertFromScheduledTasksToDtos(tasks);
         
         return Ok(taskDto);
     }
@@ -49,34 +61,34 @@ public class ScheduledTaskController : ControllerBase
         {
             return Forbid();
         }
-
-        string? dayString;
+        
+        var userId = 0;
 
         try
         {
-            dayString = GetDayString(taskDTO.ScheduledDay);
+            userId = GetUserId(principal);
         }
-        catch
+        catch (Exception e)
         {
             return BadRequest();
         }
 
-        var userId = GetUserId(principal);
+        var user = await _context.Users.Where(u => u.UserId == userId).FirstOrDefaultAsync();
 
-        var user = _context.Users.Where(u => u.UserId == userId).First();
+        try
+        {
+            var task = _taskConverter.ConvertFromDtoToScheduledTask(taskDTO, user);
+            
+            _context.ScheduledTasks.Add(task);
 
-        var task = new ScheduledTask {
-            Name = taskDTO.Name,
-            Description = taskDTO.Description,
-            User = user,
-            ScheduledDay = dayString
-        };
+            await _context.SaveChangesAsync();
 
-        _context.ScheduledTasks.Add(task);
-
-        await _context.SaveChangesAsync();
-
-        return Ok();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest();
+        }
     }
 
     [Authorize]
@@ -91,17 +103,17 @@ public class ScheduledTaskController : ControllerBase
         }
 
         string? dayString;
-
+        var userId = 0;
+        
         try
         {
-            dayString = GetDayString(taskDTO.ScheduledDay);
+            dayString = _taskConverter.GetDayString(taskDTO.ScheduledDay);
+            userId = GetUserId(principal);
         }
         catch
         {
             return BadRequest();
         }
-
-        var userId = GetUserId(principal);
 
         var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
 
@@ -137,7 +149,16 @@ public class ScheduledTaskController : ControllerBase
             return Forbid();
         }
 
-        var userId = GetUserId(principal);
+        var userId = 0;
+
+        try
+        {
+            userId = GetUserId(principal);
+        }
+        catch (Exception e)
+        {
+            return BadRequest();
+        }
 
         var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
 
@@ -173,21 +194,21 @@ public class ScheduledTaskController : ControllerBase
         }
 
         string? dayString;
-
+        var userId = 0;
+        
         try
         {
-            dayString = GetDayString(day);
+            dayString = _taskConverter.GetDayString(day);
+            userId = GetUserId(principal);
         }
         catch
         {
             return BadRequest();
         }
 
-        var userId = GetUserId(principal);
-
         var tasks = _context.ScheduledTasks.Where(t => t.User.UserId == userId && t.ScheduledDay == dayString);
 
-        return Ok(ConvertToDto(tasks));
+        return Ok(_taskConverter.ConvertFromScheduledTasksToDtos(tasks));
     }
 
     [Authorize]
@@ -210,11 +231,20 @@ public class ScheduledTaskController : ControllerBase
             return BadRequest();
         }
         
-        var userId = GetUserId(principal);
+        var userId = 0;
+
+        try
+        {
+            userId = GetUserId(principal);
+        }
+        catch (Exception e)
+        {
+            return BadRequest();
+        }
 
         var usersTasks = _context.ScheduledTasks.Where(t => t.User.UserId == userId);
 
-        var dtoUsersTasks = ConvertToDto(usersTasks);
+        var dtoUsersTasks = _taskConverter.ConvertFromScheduledTasksToDtos(usersTasks);
 
         var resultTasks = dtoUsersTasks.Where(t =>
         {
@@ -242,46 +272,5 @@ public class ScheduledTaskController : ControllerBase
         {
             throw new Exception("UserId not found in claims");
         }
-    }
-
-    private IEnumerable<ScheduledTaskDTO> ConvertToDto(IEnumerable<ScheduledTask> scheduledTasks)
-    {
-        var result = new List<ScheduledTaskDTO>();
-
-        foreach (var task in scheduledTasks)
-        {
-            var taskDto = new ScheduledTaskDTO {
-                Id = task.ScheduledTaskId,
-                Name = task.Name,
-                Description = task.Description,
-                ScheduledDay = task.ScheduledDay
-            };
-
-            result.Add(taskDto);
-        }
-
-        return result;
-    }
-    
-    private string? GetDayString(string? userString)
-    {
-        DateTime day;
-        string? dayString;
-        var culture = new CultureInfo("ru-RU");
-
-        if (userString == null)
-        {
-            dayString = null;
-        }
-        else if (!DateTime.TryParseExact(userString, "d", culture, DateTimeStyles.None, out day))
-        {
-            throw new Exception();
-        }
-        else
-        {
-            dayString = day.ToString("d", culture);
-        }
-
-        return dayString;
     }
 }

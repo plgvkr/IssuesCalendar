@@ -17,7 +17,7 @@ public class ApplicationContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var passwordHash = BCrypt.Net.BCrypt.HashPassword("default");
-
+        
         modelBuilder.Entity<User>().HasData(
             new User {UserId = 1, Email = "user@mail.com", PasswordHash = passwordHash});
     }

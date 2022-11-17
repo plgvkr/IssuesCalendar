@@ -6,4 +6,5 @@ public class ScheduledTaskDTO
     public string Name { get; set; }
     public string Description { get; set; }
     public string? ScheduledDay { get; set; }
+    public string? RepeatType { get; set; }
 }

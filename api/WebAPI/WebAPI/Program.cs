@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebAPI;
 using WebAPI.Data;
+using WebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,8 @@ builder.Services.AddSwaggerGen();
 
 // builder.Services.AddDbContext<ApplicationContext>(
 //     options => options.UseInMemoryDatabase(databaseName: "Test"));
+
+builder.Services.AddTransient<ITaskConverter, TaskConverter>();
 
 builder.Services.AddDbContext<ApplicationContext>(
     options =>
